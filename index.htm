@@ -1,0 +1,135 @@
+<html>
+  <head>
+    <!-- Pull the engine from the Quintus CDN or load it locally -->
+    <!-- (use quintus-all.min.js for production) -->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src='http://cdn.html5quintus.com/v0.2.0/quintus-all.js'></script>
+  </head>
+   <body>
+	<canvas id="main" width='500' height='500' style="background:black"></canvas>
+	<label>x: </label><input type="text" id="x" value="100" /><br />
+	<label>y: </label><input type="text" id="y" value="150" /><br />
+	<input type="button" id="apply" value="Set" />
+     <script>
+	
+	var s1;
+	
+      // Now set up your game (most games will load a separate .js file)
+      var Q = Quintus({ development: false })                          // Create a new engine instance
+              .include("Sprites, Anim, Scenes, Input, 2D, Touch, UI") // Load any needed modules
+              .setup("main")                           // Add a canvas element onto the page
+              .controls()                        // Add in default controls (keyboard, buttons)
+	Q.touch(Q.SPRITE_ALL);                          // Add in touch support (for the UI)
+	
+	Q.input.keyboardControls({
+		  LEFT: "goLeft",
+		  RIGHT: "goRight",
+		  UP: "goUp",
+		  DOWN: "goDown",
+		  Z:"outputInfo",
+		});
+		
+
+	Q.Sprite.extend("Sample", {
+		init: function(){
+			this._super({
+				sprite:"s",
+				sheet: "grasshopper",
+				x: 100,
+				y: 150,
+				
+			});
+			this.add("animation");
+			this.play("default");
+			this.on("touchEnd");
+			this.on("drag");
+			Q.input.on("goLeft",this,"goLeft");
+			Q.input.on("goRight",this,"goRight");
+			Q.input.on("goUp",this,"goUp");
+			Q.input.on("goDown",this,"goDown");
+			Q.input.on("outputInfo",this,"outputInfo");
+			
+		},
+		touchEnd: function(touch) {
+			console.log("touched")
+			this.play("run");
+		},
+		drag: function(touch) {
+			this.p.x = touch.origX + touch.dx;
+			this.p.y = touch.origY + touch.dy;
+			this.moved();
+		},
+		goLeft: function() {
+			// Do something
+			console.log('go left')
+			this.p.x -= 1;
+			this.moved();
+		},
+		goRight: function() {
+			// Do something
+			console.log('go right')
+			this.p.x += 1;
+			this.moved();
+		},
+		goUp: function() {
+			// Do something
+			console.log('go up')
+			this.p.y -= 1;
+			this.moved();
+		},
+		goDown: function() {
+			// Do something
+			console.log('go down')
+			this.p.y += 1;
+			this.moved();
+		},
+		outputInfo: function() {
+			// Do something
+			console.log('output info')
+			console.log("x:"+this.p.x)
+			console.log("y:"+this.p.y)
+		},
+		moveX:function(x){
+			this.p.x = x;
+			//this.moved();
+		},
+		moveY:function(y){
+			this.p.y = y;
+			//this.moved();
+		},
+		moved:function(){
+			$('#x').val(this.p.x)
+			$('#y').val(this.p.y)
+		}
+	});
+	
+	
+	
+	$(function() {
+		Q.scene("level1", function(stage){
+		s1 = new Q.Sample;
+		stage.insert(s1);
+		});
+			 
+		Q.load("spritesheet.png, sprites.json", function(){
+			Q.compileSheets("spritesheet.png", "sprites.json");
+
+			Q.animations("s", {
+			  default: {frames:[0]},
+			  run: {frames:[0,1,2,3,4,5,6,7,8,9,10,11,12,13], rate: 1/3, next:"default"}
+			});
+
+			Q.stageScene("level1");
+		});
+		
+		$("#apply").on('click', function() {
+			s1.moveX($('#x').val())
+			s1.moveY($('#y').val())
+			Q.reset()
+		});
+	});
+
+   </script>
+
+   </body>
+</html>
